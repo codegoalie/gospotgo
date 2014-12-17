@@ -63,25 +63,29 @@ func login(c *cli.Context) (conn *net.TCPConn) {
 		println("Could not connect to", ip, "on", port)
 		os.Exit(1)
 	}
-	fmt.Println("Connected")
+
 	connbuf := bufio.NewReader(conn)
 	str, err := connbuf.ReadString('\n')
 	login, password := c.GlobalString("login"), c.GlobalString("password")
 
-	fmt.Println("Sending authinfo")
 	conn.Write([]byte("authinfo\n"))
 	str, err = connbuf.ReadString('\n')
-	fmt.Println(str)
 
-	fmt.Println("Sending username: ", login)
 	conn.Write([]byte("authinfo user " + login + "\n"))
 	str, err = connbuf.ReadString('\n')
-	fmt.Println(str)
+	if err != nil || str != "381 PASS required\r\n" {
+		fmt.Println("Unable to send username:", login)
+		fmt.Println(str)
+		os.Exit(1)
+	}
 
-	fmt.Println("Sending password")
 	conn.Write([]byte("authinfo pass " + password + "\n"))
 	str, err = connbuf.ReadString('\n')
-	fmt.Println(str)
+	if err != nil || str != "281 Ok\r\n" {
+		fmt.Println("Unable to login")
+		fmt.Println(str)
+		os.Exit(1)
+	}
 
 	return conn
 }
