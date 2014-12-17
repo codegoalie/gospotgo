@@ -59,7 +59,6 @@ func login(c *cli.Context) (conn *net.TCPConn) {
 	}
 
 	conn, err = net.DialTCP("tcp", nil, newsAddr)
-	defer conn.Close()
 	if err != nil {
 		println("Could not connect to", ip, "on", port)
 		os.Exit(1)
