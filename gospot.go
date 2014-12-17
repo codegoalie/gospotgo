@@ -38,11 +38,19 @@ func main() {
 
 	app.Commands = []cli.Command{
 		{
-			Name: "login",
-			Usage: "login to your news server then quit",
+			Name: "groups",
+			Usage: "list the newsgroups, then quit",
 			Action: func(c *cli.Context) {
 				conn := login(c)
 				defer conn.Close()
+				conn.Write([]byte("list\n"))
+				scanner := bufio.NewScanner(conn)
+				for scanner.Scan() {
+					fmt.Println(scanner.Text())
+				}
+				if err := scanner.Err(); err != nil {
+					fmt.Fprintln(os.Stderr, "reading groups error:", err)
+				}
 			},
 		},
 	}
